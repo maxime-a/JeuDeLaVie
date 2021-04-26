@@ -1,4 +1,5 @@
 //gcc -Wall -o JeuDeLaVie JeuDeLaVie.c rappels.o jeu.o -lsx
+//commit test
 
 #include<stdlib.h>
 #include"libsx.h"
