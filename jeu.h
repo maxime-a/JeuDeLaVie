@@ -5,42 +5,42 @@ enum etat {mort,vivant};
 enum mode {conway,thompson};
 
 typedef struct {
-	int width;
-	int height;
-	char **values;
-}grid;
+	int largeur;
+	int hauteur;
+	char **valeurs;
+}grille;
 
 typedef struct {
-	char variant;
-	char grid;
-	char remove_timeout;
-	int timeout;
-	int generation;
-	grid cells;	
-}game;
+	char variante;
+	char activerGrille;
+	char desactiverDelai;
+	int delai;
+	int nombreGeneration;
+	grille cellules;	
+}jeu;
 
-game *g;
+jeu *j;
 
-extern void drawGrid();
+extern void dessinerGrille();
 
-extern void draw();
+extern void dessiner();
 
-extern void copyGrid(grid *a, grid *b);
+extern void copierGrille(grille *a, grille *b);
 
-extern void setGrid(grid *g,char val);
+extern void initialiserGrille(grille *g,char val);
 
-extern void initGrid(grid *g,char val);
+extern void creerGrille(grille *g,char val);
 
-extern void freeGrid(grid *g);
+extern void libererGrille(grille *g);
 
-extern int calculVoisins(grid g,int x,int y);
+extern int calculerVoisins(grille g,int x,int y);
 
-extern void appliquerConway(grid *cells,grid *futureCells,int x,int y,int nbVoisins);
+extern void appliquerConway(grille *cellules,grille *futurecellules,int x,int y,int nbVoisins);
 
-extern void appliquerThompson(grid *cells,grid *futureCells,int x,int y,int nbVoisins);
+extern void appliquerThompson(grille *cellules,grille *futurecellules,int x,int y,int nbVoisins);
 
-extern void update();
+extern void calculerProchaineGeneration();
 
 extern void chargerFichier(const char *filename, Widget *label);
 
-extern void saveFile(const char *filename, Widget *label);
+extern void sauvegarderFichier(const char *filename, Widget *label);

@@ -5,142 +5,219 @@
 
 #include"rappels.h"
 
-void quit(Widget w, void *data)
+/*			quitterb
+ *
+ * Rôle: procédure de rappel du bouton quitter, désalloue la mémoire et quitte si l'utilisateur est sûr de son choix 
+ * Antécédents: le widget représentant le bouton quitter, data (inutile mais nécessaire)
+ *
+ */
+void quitterb(Widget w, void *data)
 {
-	if(GetYesNo("Are you sure you want to quit ?"))
+	if(GetYesNo("Etes vous sur de vouloir quitter ?"))
 	{
-		freeGrid(&g->cells);
-		free(g);
+		libererGrille(&j->cellules);
+		free(j);
 		exit(0);
 	}
 }
 
-void clear(Widget w, void *data)
+/*			RaZb
+ *
+ * Rôle: procédure de rappel du bouton RaZ, remet à zéro l'automate si l'utilisateur est sûr de son choix 
+ * Antécédents: le widget représentant le bouton RaZ, label représentant le label affichant le numero de génération
+ *
+ */
+void RaZb(Widget w, void *label)
 {
-	if(GetYesNo("Are you sure you want to restart from zero ?"))
+	if(GetYesNo("Etes vous sur de vouloir reinitialiser le jeu ?"))
 	{
-		ClearDrawArea();
-		if(g->grid)
-			drawGrid();
-		setGrid(&g->cells,0);
+		ClearDrawArea();				//éffacer l'affichage
+		if(j->activerGrille)				
+			dessinerGrille();
+		initialiserGrille(&j->cellules,0);		//faire mourir toutes les cellules
+	
+		j->nombreGeneration=0;
+		SetLabel(label,"Generation numero : 0   ");
 	}
 }
 
+/*			button_up
+ *
+ * Rôle: procédure de rappel du clic dans la zone de dessin, fait naitre ou mourir une cellule en fonction du bouton relaché et de l'emplacement 
+ * Antécédents: le widget représentant la zone de dessin, le bouton relaché, ses coordonnées dans la zone, data(inutile mais nécessaire)
+ *
+ */
 void button_up(Widget w, int which_button, int x, int y, void *data)
 {
 	if(which_button==1)
 	{
-		if(x/10<g->cells.width && y/10<g->cells.height)	//eviter de dessiner sur des indices interdits lors de l'agrandissement de la fenêtre
+		if(x/10<j->cellules.largeur && y/10<j->cellules.hauteur)	//eviter de dessiner sur des indices interdits hors de la grille lors de l'agrandissement de la fenêtre
 		{
-			DrawFilledBox(x/10*10, y/10*10, 10, 10); 
-			g->cells.values[x/10][y/10]=vivant;
+			DrawFilledBox(x/10*10, y/10*10, 10, 10); 		//dessiner un carré aux coordonnées arrondies à la dizaine pour respecter le pas (10pixel) d'une cellule sur la grille  
+			j->cellules.valeurs[x/10][y/10]=vivant;		//mettre à jour la cellule correspondante
 		}
 	}  
 	else
 	{ 
-	  	g->cells.values[x/10][y/10]=mort;
-		draw();
+	  	j->cellules.valeurs[x/10][y/10]=mort;
+		dessiner();
 	}
 }
 
-void redraw(Widget w, int width, int height, void *data)
+/*			redessiner
+ *
+ * Rôle: procédure de rappel de la zone de dessin, sur un redimmensionnement de fenêtre ou recouvrement redessine l'état actuel
+ * Antécédents: le widget représentant la zone de dessin, la taille de la zone de dessin et data (les 3 inutiles mais nécessaires) 
+ *
+ */
+void redessiner(Widget w, int largeur, int hauteur, void *data)
 {
-	draw();	
+	dessiner();	
 }
 
-void  set_timeout_val(Widget w, float val, void *data)
+/*			changerDelai
+ *
+ * Rôle: procédure de rappel du slider, change la période d'animation 
+ * Antécédents: le widget représentant le slider, la valeur de sa position, label représentant l'affichage de la période
+ *
+ */
+void changerDelai(Widget w, float val, void *label)
 {
-  g->timeout = (int)val*10+10;
-  char s[40];
-  sprintf(s,"Periode : %.2fs      ",(float)g->timeout/1000);
-  SetLabel(data,s);
+  j->delai = (int)val*10+10;					//mise à l'échelle et offset pour éviter une période nulle
+  char s[22];
+  sprintf(s,"Periode : %.2fs      ",(float)j->delai/1000);
+  SetLabel(label,s);
   
 }
 
- void  tic(void *data)
+/*			tic
+ *
+ * Rôle: procédure appelée à chaque fin de période, passe au prochaine état de l'automate 
+ * Antécédents: label représentant le label affichant le numero de génération
+ *
+ */
+void tic(void *label)
 {
-	//Beep();
-	update(g);
+	calculerProchaineGeneration(j);
 	
 	char s[40];
-	sprintf(s,"Generation numero : %4d",g->generation);
-	SetLabel(data,s);
+	sprintf(s,"Generation numero : %4d",j->nombreGeneration);
+	SetLabel(label,s);
 	 
-	draw();
+	dessiner();
 	
-	if (g->remove_timeout == FALSE)
-    		AddTimeOut(g->timeout, tic, data);
-  	else
-    		g->remove_timeout = FALSE;
+	if (j->desactiverDelai == FALSE)
+    		AddTimeOut(j->delai, tic, label);
 }
 
-void anim(Widget w, void *data)
+/*			animerb
+ *
+ * Rôle: procédure de rappel du bouton animer, active ou désactive l'animation 
+ * Antécédents: label pointeur sur le widget label affichant le numero de génération
+ *
+ */
+void animerb(Widget w, void *label)
 {
   if (GetToggleState(w))
    {
-     SetLabel(w, "Stop Anim");
-     AddTimeOut(g->timeout, tic, data); 
+     j->desactiverDelai = FALSE;
+     SetLabel(w, "Stopper");
+     AddTimeOut(j->delai, tic, label); 
    }
   else
    {
-     g->remove_timeout = TRUE;
-     SetLabel(w, "  Animate  ");
+     j->desactiverDelai = TRUE;
+     SetLabel(w, "  Animer  ");
    }
 }
 
-void load(Widget w, char *string, void *data)
+/*			charger
+ *
+ * Rôle: procédure de rappel de la zone texte sur l'appui touche entrer, charge le fichier après confirmation de l'utilisateur 
+ * Antécédents: w le widget de la zone texte, string un pointeur sur la chaine de caractères représentant le nom de fichier, data un pointeur sur le widget de la zone texte
+ *
+ */
+void charger(Widget w, char *string, void *data)
 {
-	if(GetYesNo("Are you sure you want to load a new state from this file name ?"))
+	if(GetYesNo("Etes vous sur de vouloir charger un nouvel etat avec ce fichier ?"))
 		chargerFichier(string,data);
 }
 
-void loadb(Widget w, void *data)
+/*			chargerb
+ *
+ * Rôle: procédure de rappel du bouton charger, charge le fichier après confirmation de l'utilisateur 
+ * Antécédents: w le widget du bouton, data un pointeur sur le widget de la zone texte
+ *
+ */
+void chargerb(Widget w, void *data)
 {
 	char *string=GetStringEntry(data); 
 	
-	if(GetYesNo("Are you sure you want to load a new state from this file name ?"))
+	if(GetYesNo("Etes vous sur de vouloir charger un nouvel etat avec ce fichier ?"))
 		chargerFichier(string,data);
 }
 
-void saveb(Widget w, void *data)
+/*			sauvegarderb
+ *
+ * Rôle: procédure de rappel du bouton sauvegarder, sauvegarde le fichier après confirmation de l'utilisateur 
+ * Antécédents: w le widget du bouton, data un pointeur sur le widget de la zone texte
+ *
+ */
+void sauvegarderb(Widget w, void *data)
 {
 	char *string=GetStringEntry(data); 
 	
-	if(GetYesNo("Are you sure you want to save this state with this file name ?"))
-		saveFile(string,data);
+	if(GetYesNo("Etes vous sur de vouloir sauvegarder un nouvel etat avec ce nom de fichier ?"))
+		sauvegarderFichier(string,data);
 }
 
-void modb(Widget w, void *data)
+/*			modeb
+ *
+ * Rôle: procédure de rappel du bouton mode, permute la variante de calcul 
+ * Antécédents: w le widget du bouton, data (inutile mais nécessaire)
+ *
+ */
+void modeb(Widget w, void *data)
 {
 	if(GetToggleState(w))
 	{
-		g->variant=thompson;
+		j->variante=thompson;
 		SetLabel(w,"Thompson");
 	}
 	else
 	{
-		g->variant=conway;
+		j->variante=conway;
 		SetLabel(w,"Conway");
 	}
 }
 
-void helpb(Widget w, void *data)
+/*			aideb
+ *
+ * Rôle: procédure de rappel du bouton aide, affiche une aide sur les fonctionnalités du programme
+ * Antécédents: w le widget du bouton, data (inutile mais nécessaire)
+ *
+ */
+void aideb(Widget w, void *data)
 {
-	GetOkay("-Type a name and click corresponding buttons for loading or saving a game state\n-Use slider to change period\n-Left click on the drawing area to add a living cell\n-Right click on the drawing area to kill a cell");
+	GetOkay("-Entrez un nom de fichier et appuyez sur les boutons correspondants pour charger ou sauvegarder un etat\n-Appuyez sur le bouton RaZ pour réinitiliser l'automate\n-Utilisez la barre horizontale pour changer la periode d'animation\n-Clic gauche dans la zone d'affichage pour faire naitre une cellule a cet endroit\n-Clic droit dans la zone d'affichage pour faire mourir une cellule a cet endroit");
 }
 
-void gridb(Widget w, void *data)
+/*			grilleb
+ *
+ * Rôle: procédure de rappel du bouton grille, permute l'affichage de la grille 
+ * Antécédents: w le widget du bouton, data (inutile mais nécessaire)
+ *
+ */
+void grilleb(Widget w, void *data)
 {
 	if(GetToggleState(w))
 	{
-		g->grid=1;
-		drawGrid();
-		SetLabel(w,"Turn grid off");
+		j->activerGrille=TRUE;
+		dessinerGrille();
 	}
 	else
 	{	
-		g->grid=0;
-		draw();
-		SetLabel(w,"Turn grid on");
+		j->activerGrille=FALSE;
+		dessiner();
 	}
 }
