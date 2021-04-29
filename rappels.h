@@ -1,3 +1,9 @@
+/*			rappels.h
+ *
+ * Contient les prototypes des procédures de rappels des éléments de l'interface graphique
+ *
+ */
+ 
 #pragma once
 
 #define MAXPERIOD 99.0
@@ -59,13 +65,13 @@ extern void tic(void *label);
  */
 extern void animerb(Widget w, void *label);
 
-/*			charger
+/*			chargerOuSauvegarder
  *
- * Rôle: procédure de rappel de la zone texte sur l'appui touche entrer, charge le fichier après confirmation de l'utilisateur 
+ * Rôle: procédure de rappel de la zone texte sur l'appui touche entrer, charge ou sauvegarde le fichier après confirmation de l'utilisateur 
  * Antécédents: w le widget de la zone texte, string un pointeur sur la chaine de caractères représentant le nom de fichier, data un pointeur sur le widget de la zone texte
  *
  */
-extern void charger(Widget w, char *string, void *data);
+extern void chargerOuSauvegarder(Widget w, char *string, void *data);
 
 /*			chargerb
  *
@@ -99,11 +105,11 @@ extern void modeb(Widget w, void *data);
  */
 extern void aideb(Widget w, void *data);
 
-/*			grilleb
+/*			Quadrillageb
  *
  * Rôle: procédure de rappel du bouton grille, permute l'affichage de la grille 
  * Antécédents: w le widget du bouton, data (inutile mais nécessaire)
  *
  */
-extern void grilleb(Widget w, void *data);
+extern void Quadrillageb(Widget w, void *data);
 

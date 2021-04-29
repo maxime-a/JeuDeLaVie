@@ -1,6 +1,13 @@
+/*			rappels.c
+ *
+ * Contient les procédures de rappels des éléments de l'interface graphique
+ *
+ */
+
 #include<stdlib.h>
 #include<stdio.h>
 #include"libsx.h"
+#include"grille.h"
 #include"jeu.h"
 
 #include"rappels.h"
@@ -32,12 +39,12 @@ void RaZb(Widget w, void *label)
 	if(GetYesNo("Etes vous sur de vouloir reinitialiser le jeu ?"))
 	{
 		ClearDrawArea();				//éffacer l'affichage
-		if(j->activerGrille)				
-			dessinerGrille();
+		if(j->activerQuadrillage)				
+			dessinerQuadrillage();
 		initialiserGrille(&j->cellules,0);		//faire mourir toutes les cellules
 	
 		j->nombreGeneration=0;
-		SetLabel(label,"Generation numero : 0   ");
+		SetLabel(label,"Generation numero :    0 ");
 	}
 }
 
@@ -131,16 +138,23 @@ void animerb(Widget w, void *label)
    }
 }
 
-/*			charger
+/*			chargerOuSauvegarder
  *
- * Rôle: procédure de rappel de la zone texte sur l'appui touche entrer, charge le fichier après confirmation de l'utilisateur 
+ * Rôle: procédure de rappel de la zone texte sur l'appui touche entrer, charge ou sauvegarde le fichier après confirmation de l'utilisateur 
  * Antécédents: w le widget de la zone texte, string un pointeur sur la chaine de caractères représentant le nom de fichier, data un pointeur sur le widget de la zone texte
  *
  */
-void charger(Widget w, char *string, void *data)
+void chargerOuSauvegarder(Widget w, char *string, void *data)
 {
-	if(GetYesNo("Etes vous sur de vouloir charger un nouvel etat avec ce fichier ?"))
-		chargerFichier(string,data);
+	char nomFichier[100];
+  	sprintf(nomFichier,"sauvegarde_etat/%s",string);
+  	
+  	int choix = GetTriState("Appuyez sur Yes pour charger un nouvel etat avec ce fichier\nAppuyez sur No pour sauvegarder l'etat actuel dans ce fichier\nAppuyez sur Cancel pour annuler");
+  	
+	if(choix==TRUE)
+		chargerFichier(nomFichier,data);
+	else if(choix==FALSE)
+		sauvegarderFichier(nomFichier,data);
 }
 
 /*			chargerb
@@ -153,8 +167,11 @@ void chargerb(Widget w, void *data)
 {
 	char *string=GetStringEntry(data); 
 	
+	char nomFichier[100];
+  	sprintf(nomFichier,"sauvegarde_etat/%s",string);
+  	
 	if(GetYesNo("Etes vous sur de vouloir charger un nouvel etat avec ce fichier ?"))
-		chargerFichier(string,data);
+		chargerFichier(nomFichier,data);
 }
 
 /*			sauvegarderb
@@ -167,8 +184,11 @@ void sauvegarderb(Widget w, void *data)
 {
 	char *string=GetStringEntry(data); 
 	
+	char nomFichier[100];
+  	sprintf(nomFichier,"sauvegarde_etat/%s",string);
+	
 	if(GetYesNo("Etes vous sur de vouloir sauvegarder un nouvel etat avec ce nom de fichier ?"))
-		sauvegarderFichier(string,data);
+		sauvegarderFichier(nomFichier,data);
 }
 
 /*			modeb
@@ -202,22 +222,22 @@ void aideb(Widget w, void *data)
 	GetOkay("-Entrez un nom de fichier et appuyez sur les boutons correspondants pour charger ou sauvegarder un etat\n-Appuyez sur le bouton RaZ pour réinitiliser l'automate\n-Utilisez la barre horizontale pour changer la periode d'animation\n-Clic gauche dans la zone d'affichage pour faire naitre une cellule a cet endroit\n-Clic droit dans la zone d'affichage pour faire mourir une cellule a cet endroit");
 }
 
-/*			grilleb
+/*			Quadrillageb
  *
  * Rôle: procédure de rappel du bouton grille, permute l'affichage de la grille 
  * Antécédents: w le widget du bouton, data (inutile mais nécessaire)
  *
  */
-void grilleb(Widget w, void *data)
+void Quadrillageb(Widget w, void *data)
 {
 	if(GetToggleState(w))
 	{
-		j->activerGrille=TRUE;
-		dessinerGrille();
+		j->activerQuadrillage=TRUE;
+		dessinerQuadrillage();
 	}
 	else
 	{	
-		j->activerGrille=FALSE;
+		j->activerQuadrillage=FALSE;
 		dessiner();
 	}
 }

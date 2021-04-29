@@ -1,24 +1,45 @@
+/*			jeu.c
+ *
+ * Contient les fonctions et procédures permettant le déroulement du jeu de la vie 
+ * et la manipulation des données du type jeu.
+ *
+ */
+
 #include<stdlib.h>
 #include<stdio.h>
 #include<assert.h>
 #include<errno.h>
 #include"libsx.h"
+#include"grille.h"
 
 #include"jeu.h"
 
-void dessinerGrille()
+/*			dessinerQuadrillage
+ *
+ * Rôle: dessine un grille avec un pas de 10 pixels dans la zone de dessin
+ *
+ */
+void dessinerQuadrillage()
 {
-	for(int x=1;x<=j->cellules.largeur;x++){
-		DrawLine(x*10,0,x*10,j->cellules.hauteur*10);}
-		for(int y=1;y<=j->cellules.hauteur;y++){
-			DrawLine(0,y*10,j->cellules.largeur*10,y*10);}	
+	for(int x=1;x<=j->cellules.largeur;x++)
+	{
+		DrawLine(x*10,0,x*10,j->cellules.hauteur*10); 	 //Dessin des barres verticales
+		
+		for(int y=1;y<=j->cellules.hauteur;y++)
+			DrawLine(0,y*10,j->cellules.largeur*10,y*10);  //Dessin des barres horizontales
+	} 	
 }
 
+/*			dessiner
+ *
+ * Rôle: dessine la grille si activée et les cellules vivantes de l'état actuel
+ *
+ */
 void dessiner()
 {
 	ClearDrawArea(); 
-	if(j->activerGrille)
-		dessinerGrille();
+	if(j->activerQuadrillage)
+		dessinerQuadrillage();
 		
 	for(int x=0;x<j->cellules.largeur;x++)
 	{
@@ -30,44 +51,11 @@ void dessiner()
 	}
 }
 
-void copierGrille(grille *a, grille *b)
-{
-	assert(a->largeur==b->largeur&&a->hauteur==b->hauteur);
-	for(int x=0;x<a->largeur;x++)
-	{
-		for(int y=0;y<a->hauteur;y++)
-		{
-			a->valeurs[x][y]=b->valeurs[x][y];
-		}
-	}
-}
-
-void initialiserGrille(grille *g,char val)
-{
-	for(int x=0;x<g->largeur;x++)
-	{
-		for(int y=0;y<g->hauteur;y++)
-		{
-			g->valeurs[x][y]=val;
-		}
-	}
-}
-
-void creerGrille(grille *g,char val)
-{
-	g->valeurs = malloc(g->hauteur * sizeof(char *));	
-    	for (int i=0; i<g->hauteur; i++)
-        	g->valeurs[i] = malloc(g->largeur * sizeof(char));
-	initialiserGrille(g,val);
-}
-
-void libererGrille(grille *g)
-{	
-    	for (int i=0; i<g->hauteur; i++)
-        	free(g->valeurs[i]);
-        free(g->valeurs);
-}
-
+/*			calculerVoisins
+ *
+ * Rôle: calcul le nombre de voisins d'une cellule
+ * Antécédents: g un pointeur sur grille et x,y des entiers pour les coordonnées de la cellule dans cette grille
+ */
 int calculerVoisins(grille g,int x,int y)
 {
 	int nbVoisins=0;
@@ -80,6 +68,11 @@ int calculerVoisins(grille g,int x,int y)
 	return nbVoisins;
 }
 
+/*			appliquerConway
+ *
+ * Rôle: calcul selon la règle de J.Conway si une cellule nait, survit ou meurt
+ * Antécédents: cellules un pointeur sur la grille des états courants, futureCellules un pointeur sur la grille des états suivants, x,y des entiers pour les coordonnées de la cellule dans cette grille, nbVoisins le nombre de voisins de cette cellules
+ */
 void appliquerConway(grille *cellules,grille *futurecellules,int x,int y,int nbVoisins)
 {
 	if(cellules->valeurs[x][y]==vivant)
@@ -95,6 +88,11 @@ void appliquerConway(grille *cellules,grille *futurecellules,int x,int y,int nbV
 		futurecellules->valeurs[x][y]=mort;
 }
 
+/*			appliquerThompson
+ *
+ * Rôle: calcul selon la règle Day&Night de Thompson si une cellule nait, survit ou meurt
+ * Antécédents: cellules un pointeur sur la grille des états courants, futureCellules un pointeur sur la grille des états suivants, x,y des entiers pour les coordonnées de la cellule dans cette grille, nbVoisins le nombre de voisins de cette cellules
+ */
 void appliquerThompson(grille *cellules,grille *futurecellules,int x,int y,int nbVoisins)
 {
 	if(cellules->valeurs[x][y]==vivant)
@@ -109,10 +107,15 @@ void appliquerThompson(grille *cellules,grille *futurecellules,int x,int y,int n
 			futurecellules->valeurs[x][y]=mort;
 }
 
+/*			calculerProchaineGeneration
+ *
+ * Rôle: calcul selon la règle en vigueur les prochains états des cellules de l'automate
+ * 
+ */
 void calculerProchaineGeneration()
 {
 	char nbVoisins;
-	grille futurecellules={j->cellules.largeur,j->cellules.hauteur};
+	grille futurecellules={j->cellules.largeur,j->cellules.hauteur};		//grille tampon pour la nouvelle genration
 	creerGrille(&futurecellules,0);
 	
 	for(int x=0;x<j->cellules.largeur;x++)
@@ -124,17 +127,23 @@ void calculerProchaineGeneration()
 			else
 				appliquerThompson(&(j->cellules),&futurecellules,x,y,nbVoisins);
 		}
-	copierGrille(&(j->cellules),&futurecellules);
+	copierGrille(&(j->cellules),&futurecellules);					
 	j->nombreGeneration++;
 }
 
+/*			chargerFichier
+ *
+ * Rôle: charge un état du jeu d'après un fichier
+ * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte
+ *
+ */
 void chargerFichier(const char *filename, Widget *label)
 {
 	FILE *fichier;
 	if((fichier=fopen(filename, "r"))== NULL)
 	{
 		perror(filename);
-		SetStringEntry(*label, "Unable to load file");
+		SetStringEntry(*label, "Chargement impossible");
 		Beep();
 	}
 	else
@@ -144,7 +153,7 @@ void chargerFichier(const char *filename, Widget *label)
 		initialiserGrille(&j->cellules,0);
 
 		while((fscanf(fichier,"%d,%d",&x,&y)!=EOF))		
-			j->cellules.valeurs[x+j->cellules.largeur/2][y+j->cellules.hauteur/2]=vivant;
+			j->cellules.valeurs[x+j->cellules.largeur/2][y+j->cellules.hauteur/2]=vivant; //lire et décentrer les coordonées du fichier avant de modifier l'état de la cellule correspondante.
 		dessiner();
 		fclose(fichier);
 		
@@ -152,13 +161,19 @@ void chargerFichier(const char *filename, Widget *label)
 	}
 }
 
+/*			sauvegarderFichier
+ *
+ * Rôle: sauvegarde un état du jeu dans un fichier
+ * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte
+ *
+ */
 void sauvegarderFichier(const char *filename, Widget *label)
 {
 	FILE *fichier;
 	if((fichier=fopen(filename, "w"))== NULL)
 	{
 		perror(filename);
-		SetStringEntry(*label, "Unable to save file");
+		SetStringEntry(*label, "Sauvegarde impossible");
 		Beep();
 	}
 	else
@@ -166,8 +181,7 @@ void sauvegarderFichier(const char *filename, Widget *label)
 		for(int x=0;x<j->cellules.largeur;x++)
 			for(int y=0;y<j->cellules.hauteur;y++)
 				if(j->cellules.valeurs[x][y])
-					fprintf(fichier,"%d,%d\n",x-j->cellules.largeur/2,y-j->cellules.hauteur/2);
-					//centrer les coordonnées (milieu de grille = 0,0)
+					fprintf(fichier,"%d,%d\n",x-j->cellules.largeur/2,y-j->cellules.hauteur/2); //écrire avec les coordonnées centrées(milieu de grille = 0,0 selon l'écriture fichier)
 		fclose(fichier);
 	}
 }
