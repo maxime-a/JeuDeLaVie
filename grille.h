@@ -18,7 +18,7 @@ typedef struct {
  * Antécédents : a un pointeur sur la grille de destination, b un pointeur sur la grille copiée 
  * 
  */
-extern void copierGrille(grille *a, grille *b);
+extern void copierGrille(grille *a,const grille *b);
 
 /*			initialiserGrille
  *

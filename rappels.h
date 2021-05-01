@@ -9,6 +9,13 @@
 #define MAXPERIOD 99.0
 #define MINPERIOD 10.0
 
+typedef struct {
+	Widget widgetFichier;
+	Widget labelGeneration;
+	Widget labelPeriode;
+	jeu *j;
+}donnee;
+
 /*			quitterb
  *
  * Rôle: procédure de rappel du bouton quitter, désalloue la mémoire et quitte si l'utilisateur est sûr de son choix 

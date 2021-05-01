@@ -23,21 +23,21 @@ typedef struct {
 	grille cellules;	
 }jeu;
 
-jeu *j;
-
 /*			dessinerQuadrillage
  *
  * Rôle: dessine un grille avec un pas de 10 pixels dans la zone de dessin
+ * Antécédent: j un pointeur sur jeu
  *
  */
-extern void dessinerQuadrillage();
+extern void dessinerQuadrillage(jeu *j);
 
 /*			dessiner
  *
  * Rôle: dessine la grille si activée et les cellules vivantes de l'état actuel
+ * Antécédent: j un pointeur sur jeu
  *
  */
-extern void dessiner();
+extern void dessiner(jeu *j);
 
 
 /*			calculerVoisins
@@ -64,22 +64,23 @@ extern void appliquerThompson(grille *cellules,grille *futurecellules,int x,int 
 /*			calculerProchaineGeneration
  *
  * Rôle: calcul selon la règle en vigueur les prochains états des cellules de l'automate
+ * Antécédent: j un pointeur sur jeu
  * 
  */
-extern void calculerProchaineGeneration();
+extern void calculerProchaineGeneration(jeu *j);
 
 /*			chargerFichier
  *
  * Rôle: charge un état du jeu d'après un fichier
- * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte
+ * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte, j un pointeur sur jeu
  *
  */
-extern void chargerFichier(const char *filename, Widget *label);
+extern void chargerFichier(const char *filename, Widget *label, jeu *j);
 
 /*			sauvegarderFichier
  *
  * Rôle: sauvegarde un état du jeu dans un fichier
- * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte
+ * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte, j un pointeur sur jeu
  *
  */
-extern void sauvegarderFichier(const char *filename, Widget *label);
+extern void sauvegarderFichier(const char *filename, Widget *label, jeu *j);

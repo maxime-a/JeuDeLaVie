@@ -16,16 +16,13 @@
  * Antécédents : a un pointeur sur la grille de destination, b un pointeur sur la grille copiée 
  * 
  */
-void copierGrille(grille *a, grille *b)
+void copierGrille(grille *a,const grille *b)
 {
-	assert(a->largeur==b->largeur&&a->hauteur==b->hauteur); //Les grilles sont de même tailles
+	assert(a->largeur==b->largeur&&a->hauteur==b->hauteur); //Les grilles sont de même taille
+	//invariant : toute cellule de coordonnée x,y de la grille a prends la valeur de celles de la grille b
 	for(int x=0;x<a->largeur;x++)
-	{
 		for(int y=0;y<a->hauteur;y++)
-		{
 			a->valeurs[x][y]=b->valeurs[x][y];
-		}
-	}
 }
 
 /*			initialiserGrille
@@ -35,13 +32,10 @@ void copierGrille(grille *a, grille *b)
  */
 void initialiserGrille(grille *g,char val)
 {
+	//invariant : toute cellule de coordonnée x,y de la grille a prends la valeur de la variable val
 	for(int x=0;x<g->largeur;x++)
-	{
 		for(int y=0;y<g->hauteur;y++)
-		{
 			g->valeurs[x][y]=val;
-		}
-	}
 }
 
 /*			creerGrille
@@ -51,9 +45,11 @@ void initialiserGrille(grille *g,char val)
  */
 void creerGrille(grille *g,char val)
 {
-	g->valeurs = malloc(g->hauteur * sizeof(char *));	
-    	for (int i=0; i<g->hauteur; i++)
-        	g->valeurs[i] = malloc(g->largeur * sizeof(char));
+        g->valeurs = malloc(g->largeur * sizeof(char *));	
+	//invariant : pour tout i sur la largeur de la grille, valeur[i] pointe vers un tableau de taille hauteur
+    	for (int i=0; i<g->largeur; i++)
+        	g->valeurs[i] = malloc(g->hauteur * sizeof(char));
+        
 	initialiserGrille(g,val);
 }
 
@@ -64,7 +60,8 @@ void creerGrille(grille *g,char val)
  */
 void libererGrille(grille *g)
 {	
-    	for (int i=0; i<g->hauteur; i++)
+	//invariant : pour tout i sur la largeur de la grille, la mémoire en valeur[i] est désallouée 
+    	for (int i=0; i<g->largeur; i++)
         	free(g->valeurs[i]);
         free(g->valeurs);
 }

@@ -17,9 +17,10 @@
 /*			dessinerQuadrillage
  *
  * Rôle: dessine un grille avec un pas de 10 pixels dans la zone de dessin
+ * Antécédent: j un pointeur sur jeu
  *
  */
-void dessinerQuadrillage()
+void dessinerQuadrillage(jeu *j)
 {
 	for(int x=1;x<=j->cellules.largeur;x++)
 	{
@@ -33,13 +34,14 @@ void dessinerQuadrillage()
 /*			dessiner
  *
  * Rôle: dessine la grille si activée et les cellules vivantes de l'état actuel
+ * Antécédent: j un pointeur sur jeu
  *
  */
-void dessiner()
+void dessiner(jeu *j)
 {
 	ClearDrawArea(); 
 	if(j->activerQuadrillage)
-		dessinerQuadrillage();
+		dessinerQuadrillage(j);
 		
 	for(int x=0;x<j->cellules.largeur;x++)
 	{
@@ -110,9 +112,10 @@ void appliquerThompson(grille *cellules,grille *futurecellules,int x,int y,int n
 /*			calculerProchaineGeneration
  *
  * Rôle: calcul selon la règle en vigueur les prochains états des cellules de l'automate
+ * Antécédent: j un pointeur sur jeu
  * 
  */
-void calculerProchaineGeneration()
+void calculerProchaineGeneration(jeu *j)
 {
 	char nbVoisins;
 	grille futurecellules={j->cellules.largeur,j->cellules.hauteur};		//grille tampon pour la nouvelle genration
@@ -134,10 +137,10 @@ void calculerProchaineGeneration()
 /*			chargerFichier
  *
  * Rôle: charge un état du jeu d'après un fichier
- * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte
+ * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte, j un pointeur sur jeu
  *
  */
-void chargerFichier(const char *filename, Widget *label)
+void chargerFichier(const char *filename, Widget *label, jeu *j)
 {
 	FILE *fichier;
 	if((fichier=fopen(filename, "r"))== NULL)
@@ -148,13 +151,25 @@ void chargerFichier(const char *filename, Widget *label)
 	}
 	else
 	{
-		int x,y;
+		int x1,y1,x2,y2; //x1,y1 coordonnées du fichier , x2,y2 coordonées du jeu
 
 		initialiserGrille(&j->cellules,0);
 
-		while((fscanf(fichier,"%d,%d",&x,&y)!=EOF))		
-			j->cellules.valeurs[x+j->cellules.largeur/2][y+j->cellules.hauteur/2]=vivant; //lire et décentrer les coordonées du fichier avant de modifier l'état de la cellule correspondante.
-		dessiner();
+		//lire et décentrer les coordonées du fichier avant de modifier l'état de la cellule correspondante.
+		while((fscanf(fichier,"%d,%d",&x1,&y1)!=EOF))
+		{
+			x2=x1+j->cellules.largeur/2;
+			y2=y1+j->cellules.hauteur/2;
+			
+			if(x2>=0 && x2<j->cellules.largeur && y2>=0 && y2<j->cellules.hauteur) //coordonnées valide dans la zone de jeu 
+				j->cellules.valeurs[x2][y2]=vivant; 
+			else
+			{
+				Beep();
+				SetStringEntry(*label, "Dessin partiel taille insuffisante");
+			}
+		}
+		dessiner(j);
 		fclose(fichier);
 		
 		j->nombreGeneration=0;
@@ -164,10 +179,10 @@ void chargerFichier(const char *filename, Widget *label)
 /*			sauvegarderFichier
  *
  * Rôle: sauvegarde un état du jeu dans un fichier
- * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte
+ * Antécédents: filename une chaine de caractères, label un pointeur sur le widget de la zone texte, j un pointeur sur jeu
  *
  */
-void sauvegarderFichier(const char *filename, Widget *label)
+void sauvegarderFichier(const char *filename, Widget *label,jeu *j)
 {
 	FILE *fichier;
 	if((fichier=fopen(filename, "w"))== NULL)

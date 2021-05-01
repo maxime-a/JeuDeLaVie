@@ -6,35 +6,69 @@
  */
 
 #include<stdlib.h>
+#include<string.h>
 #include"libsx.h"
 #include"jeu.h"
 #include"rappels.h"
 
 #define TAILLE 50
+#define HAUTEURMIN 15
+#define LARGEURMIN 1
 
 /*			initialiserDonnees
  *
  * Rôle: initialise le jeu  
- * Antécédents: aucuns , le jeu est une variable globale
+ * Antécédents: argc le nombre d'arguments et argv les arguments lors de l'appel du programme
  *
  */
-int initialiserDonnees()
+donnee *initialiserDonnees(int argc, char *argv[])
 {
+	jeu *j;
+	
 	j=malloc(sizeof(jeu));
 	
 	if(j==NULL)				//Si problème d'allocation 
-		return EXIT_FAILURE;
+		return NULL;
 	
 	j->cellules.largeur=TAILLE;
 	j->cellules.hauteur=TAILLE;
+	
+    	if(argc>2)				//Si deux paramètres sont fournis pour la largeur et hauteur
+    	{
+    			int l,h;
+    			
+    			l=atoi(argv[1]);
+    			if(l>=LARGEURMIN)    	//paramètre valide
+    				j->cellules.largeur=l;
+    			h=atoi(argv[2]);
+    			if(h>=HAUTEURMIN)	//paramètre valide
+    				j->cellules.hauteur=h;
+    	}
+    	else if(argc==2)			//Si un seul paramètre, largeur et hauteur seront identique au paramètre
+ 	{
+    		int taille;
+   			
+  		taille=atoi(argv[1]);
+    		if(taille>=HAUTEURMIN)		//paramètre valide
+    		{
+    			j->cellules.largeur=taille;
+    			j->cellules.hauteur=taille;
+		}
+    	}
+	
 	j->variante=conway;
 	j->desactiverDelai=TRUE;
 	j->delai=500;				//0.5s par défaut
 	j->activerQuadrillage=TRUE;
 	j->nombreGeneration=0;
+	
 	creerGrille(&(j->cellules),0);
 	
-	return EXIT_SUCCESS;
+	donnee *d=malloc(sizeof(donnee));
+	
+	d->j=j;
+	
+	return d;
 }
 
 /*			initialiserAffichage
@@ -43,26 +77,34 @@ int initialiserDonnees()
  * Antécédents: argc et argv lors de l'appel du programme
  *
  */
-int initialiserAffichage(int argc, char *argv[])
+int initialiserAffichage(int argc, char *argv[],donnee *d)
 {
 	argc = OpenDisplay(argc, argv);						//Permet de donner le nom au programme (notamment)
   	if (argc == FALSE)
     		return EXIT_FAILURE;
+    	//donne necessaire
+    	// fichier
+    	// lgeneration
+    	// lPeriode
+    	// j 
 	
 	Widget fichier=MakeStringEntry("Nom du fichier", 200, chargerOuSauvegarder, NULL); 	//Zone d'entrée texte pour le nom des fichiers
-	Widget bQuitter=MakeButton("Quitter", quitterb, NULL);
-	Widget bCharger=MakeButton("Charger", chargerb, fichier);
-	Widget bSauvegarder=MakeButton("Sauvegarder", sauvegarderb, fichier);
+	d->widgetFichier=fichier;
+	Widget bQuitter=MakeButton("Quitter", quitterb, d);
+	Widget bCharger=MakeButton("Charger", chargerb, d);
+	Widget bSauvegarder=MakeButton("Sauvegarder", sauvegarderb, d);
 	Widget lGeneration=MakeLabel("Generation numero :    0 ");
-	Widget bRaZ=MakeButton("RaZ", RaZb, lGeneration);
+	d->labelGeneration=lGeneration;
+	Widget bRaZ=MakeButton("RaZ", RaZb, d);
 	Widget lPeriode=MakeLabel("Periode : 0.5s      ");
-	Widget bAnimer=MakeToggle("  Animer  ", FALSE, NULL, animerb, lGeneration);
-	Widget slider=MakeHorizScrollbar(400,changerDelai,lPeriode);
-	Widget jeu=MakeDrawArea(TAILLE*10,TAILLE*10, redessiner, j);			//Zone de dessin du jeu
+	d->labelPeriode=lPeriode;
+	Widget bAnimer=MakeToggle("  Animer  ", FALSE, NULL, animerb, d);
+	Widget slider=MakeHorizScrollbar(400,changerDelai,d);
+	Widget jeu=MakeDrawArea(d->j->cellules.largeur*10,d->j->cellules.hauteur*10, redessiner, d);			//Zone de dessin du jeu
 	Widget lMode=MakeLabel("Variante de calcul :");
-	Widget bMode=MakeToggle("Conway  ", FALSE, NULL, modeb, NULL); 
+	Widget bMode=MakeToggle("Conway  ", FALSE, NULL, modeb, d); 
 	Widget bAide=MakeButton("Aide",aideb,NULL);
-	Widget bQuadrillage=MakeToggle("Afficher quadrillage",TRUE,NULL,Quadrillageb,NULL);
+	Widget bQuadrillage=MakeToggle("Afficher quadrillage",TRUE,NULL,Quadrillageb,d);
 		
 	SetButtonUpCB(jeu, button_up); 						//Rappel lors d'un clic dans la zone
 	
@@ -101,10 +143,11 @@ int initialiserAffichage(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	if(initialiserDonnees()==EXIT_FAILURE)
+	donnee *d;
+	if((d=initialiserDonnees(argc,argv))==NULL)
 		return EXIT_FAILURE;
 		
-	if(!initialiserAffichage(argc,argv))
+	if(!initialiserAffichage(argc,argv,d))
 		return EXIT_FAILURE;	
 	
 	ShowDisplay();
