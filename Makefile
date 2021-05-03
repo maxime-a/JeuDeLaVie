@@ -1,7 +1,7 @@
 CC = gcc             # le compilateur à utiliser
 CFLAGS = -Wall  # les options du compilateur
 LDFLAGS = -lsx      # les options pour l'éditeur de liens
-SRC = grille.c jeu.c rappels.c main.c  # les fichiers sources
+SRC = donnees.c vue.c grille.c jeu.c rappels.c main.c  # les fichiers sources
 PROG = JeuDeLaVie          # nom de l'exécutable
 OBJS =  $(SRC:.c=.o) # les .o qui en découlent
 .SUFFIXES: .c .o     # lien entre les suffixes
@@ -13,9 +13,9 @@ all: $(PROG)
 $(PROG): $(OBJS)
 	$(CC)  -o $@ $^ $(LDFLAGS)
 
-
 rappels.o: jeu.h
 jeu.o: grille.h
+main.o: vue.h
 # le lien entre .o et .c
 # $< dernière dépendance	
 %.o: %.c
