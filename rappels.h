@@ -73,6 +73,15 @@ extern void animerb(Widget w, void *label);
  */
 extern void chargerOuSauvegarder(Widget w, char *string, void *data);
 
+/*			choixFichiersb
+ *
+ * Rôle: procédure de rappel du bouton choisir un fichier, permet de récupérer le chemin d'accès et le nom du fichier 
+ * entré par l'utilisateur  
+ * Antécédents: w le widget du bouton, data une structure donnees 
+ *
+ */
+extern void choixFichiersb(Widget w,void *data);
+
 /*			chargerb
  *
  * Rôle: procédure de rappel du bouton charger, charge le fichier après confirmation de l'utilisateur 

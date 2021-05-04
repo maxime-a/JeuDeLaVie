@@ -9,7 +9,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include"libsx.h"
-#include"jeu.h"
+#include"modele.h"
 
 /*			initialiserAffichage
  *
@@ -18,3 +18,19 @@
  *
  */
 extern int initialiserAffichage(int argc, char *argv[],donnees *d);
+
+/*			dessinerQuadrillage
+ *
+ * Rôle: dessine un grille avec un pas de 10 pixels dans la zone de dessin
+ * Antécédent: j un pointeur sur jeu
+ *
+ */
+extern void dessinerQuadrillage(donnees *d);
+
+/*			dessiner
+ *
+ * Rôle: dessine la grille si activée et les cellules vivantes de l'état actuel
+ * Antécédent: j un pointeur sur jeu
+ *
+ */
+extern void dessiner(donnees *d);

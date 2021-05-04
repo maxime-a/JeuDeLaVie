@@ -8,7 +8,7 @@
 #include<stdio.h>
 #include"libsx.h"
 #include"donnees.h"
-#include"grille.h"
+#include"vue.h"
 
 #include"rappels.h"
 
@@ -23,10 +23,7 @@ void quitterb(Widget w, void *data)
 	donnees *d = (donnees *)data; 
 	if(GetYesNo("Etes vous sur de vouloir quitter ?"))
 	{
-		//faire une fonction pour liberer d
-		libererGrille(&d->j->cellules);
-		free(d->j);
-		free(d);
+		libererDonnees(d);
 		exit(0);
 	}
 }
@@ -43,12 +40,10 @@ void RaZb(Widget w, void *data)
 	if(GetYesNo("Etes vous sur de vouloir reinitialiser le jeu ?"))
 	{
 		ClearDrawArea();				//éffacer l'affichage
-		if(d->j->activerQuadrillage)				
-			dessinerQuadrillage(d->j);
-		initialiserGrille(&d->j->cellules,0);		//faire mourir toutes les cellules
-	
-		d->j->nombreGeneration=0;
-		SetLabel(d->labelGeneration,"Generation numero :    0 ");
+		if(getQuadrillage(d))				
+			dessinerQuadrillage(d);
+		reinitialiserDonnees(d);
+		SetLabel(getLabelGeneration(d),"Generation numero :    0 ");
 	}
 }
 
@@ -63,16 +58,16 @@ void button_up(Widget w, int which_button, int x, int y, void *data)
 	donnees *d = (donnees *)data;                         //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
 	if(which_button==1)
 	{
-		if(x/10<d->j->cellules.largeur && y/10<d->j->cellules.hauteur)	//eviter de dessiner sur des indices interdits hors de la grille lors de l'agrandissement de la fenêtre
+		if(x/10<getLargeur(d) && y/10<getHauteur(d))	//eviter de dessiner sur des indices interdits hors de la grille lors de l'agrandissement de la fenêtre
 		{
 			DrawFilledBox(x/10*10, y/10*10, 10, 10); 		//dessiner un carré aux coordonnées arrondies à la dizaine pour respecter le pas (10pixel) d'une cellule sur la grille  
-			d->j->cellules.valeurs[x/10][y/10]=vivant;		//mettre à jour la cellule correspondante
+			setValeur(d,x/10,y/10,vivant);			//mettre à jour la cellule correspondante
 		}
 	}  
 	else
 	{ 
-	  	d->j->cellules.valeurs[x/10][y/10]=mort;
-		dessiner(d->j);
+	  	setValeur(d,x/10,y/10,mort);
+		dessiner(d);
 	}
 }
 
@@ -85,7 +80,7 @@ void button_up(Widget w, int which_button, int x, int y, void *data)
 void redessiner(Widget w, int largeur, int hauteur, void *data)
 {
 	donnees *d = (donnees *)data;                           //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
-	dessiner(d->j);	
+	dessiner(d);	
 }
 
 /*			changerDelai
@@ -97,10 +92,10 @@ void redessiner(Widget w, int largeur, int hauteur, void *data)
 void changerDelai(Widget w, float val, void *data)
 {
 	donnees *d = (donnees *)data;                           //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
-  	d->j->delai = (int)val*10+10;					//mise à l'échelle et offset pour éviter une période nulle
+  	setDelai(d,(int)val*10+10);				  //mise à l'échelle et offset pour éviter une période nulle
   	char s[22];
-  	sprintf(s,"Periode : %.2fs      ",(float)d->j->delai/1000);
-  	SetLabel(d->labelPeriode,s);
+  	sprintf(s,"Periode : %.2fs      ",(float)getDelai(d)/1000);
+  	SetLabel(getLabelPeriode(d),s);
   
 }
 
@@ -114,16 +109,16 @@ void tic(void *data)
 {
 	donnees *d = (donnees *)data;                           //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
 	
-	calculerProchaineGeneration(d->j);
+	calculerProchaineGeneration(d);
 	
 	char s[40];
-	sprintf(s,"Generation numero : %4d",d->j->nombreGeneration);
-	SetLabel(d->labelGeneration,s);
+	sprintf(s,"Generation numero : %4d",getNombreGeneration(d));
+	SetLabel(getLabelGeneration(d),s);
 	 
-	dessiner(d->j);
+	dessiner(d);
 	
-	if (d->j->desactiverDelai == FALSE)
-    		AddTimeOut(d->j->delai, tic, d);
+	if (getDesactiverDelai(d) == FALSE)
+    		AddTimeOut(getDelai(d), tic, d);
 }
 
 /*			animerb
@@ -138,13 +133,13 @@ void animerb(Widget w, void *data)
 
   	if (GetToggleState(w))
    	{
-     		d->j->desactiverDelai = FALSE;
+     		setDesactiverDelai(d,FALSE);
      		SetLabel(w, "Stopper");
-     		AddTimeOut(d->j->delai, tic, d); 
+     		AddTimeOut(getDelai(d), tic, d); 
    	}
   	else
    	{
-     		d->j->desactiverDelai = TRUE;
+     		setDesactiverDelai(d,TRUE);
      		SetLabel(w, "  Animer  ");
    	}
 }
@@ -165,9 +160,25 @@ void chargerOuSauvegarder(Widget w, char *string, void *data)
   	int choix = GetTriState("Appuyez sur Yes pour charger un nouvel etat avec ce fichier\nAppuyez sur No pour sauvegarder l'etat actuel dans ce fichier\nAppuyez sur Cancel pour annuler");
   	
 	if(choix==TRUE)
-		chargerFichier(nomFichier,&d->widgetFichier,d->j);
+		chargerFichier(nomFichier,d);
 	else if(choix==FALSE)
-		sauvegarderFichier(nomFichier,&d->widgetFichier,d->j);
+		sauvegarderFichier(nomFichier,d);
+}
+
+/*			choixFichiersb
+ *
+ * Rôle: procédure de rappel du bouton choisir un fichier, permet de récupérer le chemin d'accès et le nom du fichier 
+ * entré par l'utilisateur  
+ * Antécédents: w le widget du bouton, data une structure donnees 
+ *
+ */
+void choixFichiersb(Widget w,void *data)
+{
+	donnees *d = (donnees *)data;                      //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
+
+	SetFreqFilter("*.jdlv"); 
+	char *nomFichier=GetFile("/!\\ Un clic dans l'aboresence peut provoquer une erreur\nEcrire sinon le nom dans la zone texte de cette fenetre\nOu encore depuis la fenetre principale avec le chemin d'acces\nSi le fichier n'existe pas il sera cree lors de l'appui sur le bouton sauvegarder", "./sauvegarde_etat", NULL, NULL) ;
+	SetStringEntry(getWidgetFichier(d),nomFichier);
 }
 
 /*			chargerb
@@ -180,14 +191,12 @@ void chargerOuSauvegarder(Widget w, char *string, void *data)
 void chargerb(Widget w, void *data)
 {
 	donnees *d = (donnees *)data;                           //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
-
-	char *string=GetStringEntry(d->widgetFichier); 
 	
-	char nomFichier[100];
-  	sprintf(nomFichier,"sauvegarde_etat/%s",string);
+	char *nomFichier=GetStringEntry(getWidgetFichier(d)); 
   	
-	if(GetYesNo("Etes vous sur de vouloir charger un nouvel etat avec ce fichier ?"))
-		chargerFichier(nomFichier,&d->widgetFichier,d->j);
+	if(GetYesNo("Etes vous sur de vouloir charger un nouvel etat avec ce fichier ?"))	
+		chargerFichier(nomFichier,d);
+
 }
 
 /*			sauvegarderb
@@ -200,13 +209,10 @@ void sauvegarderb(Widget w, void *data)
 {
 	donnees *d = (donnees *)data;                           //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
 	
-	char *string=GetStringEntry(d->widgetFichier); 
-	
-	char nomFichier[100];
-  	sprintf(nomFichier,"sauvegarde_etat/%s",string);
+	char *nomFichier=GetStringEntry(getWidgetFichier(d)); 
 	
 	if(GetYesNo("Etes vous sur de vouloir sauvegarder un nouvel etat avec ce nom de fichier ?"))
-		sauvegarderFichier(nomFichier,&d->widgetFichier,d->j);
+		sauvegarderFichier(nomFichier,d);
 }
 
 /*			modeb
@@ -221,12 +227,12 @@ void modeb(Widget w, void *data)
 	
 	if(GetToggleState(w))
 	{
-		d->j->variante=thompson;
+		setVariante(d,thompson);
 		SetLabel(w,"Thompson");
 	}
 	else
 	{
-		d->j->variante=conway;
+		setVariante(d,conway);
 		SetLabel(w,"Conway");
 	}
 }
@@ -254,12 +260,12 @@ void Quadrillageb(Widget w, void *data)
 	
 	if(GetToggleState(w))
 	{
-		d->j->activerQuadrillage=TRUE;
-		dessinerQuadrillage(d->j);
+		setActiverQuadrillage(d,TRUE);
+		dessinerQuadrillage(d);
 	}
 	else
 	{	
-		d->j->activerQuadrillage=FALSE;
-		dessiner(d->j);
+		setActiverQuadrillage(d,FALSE);
+		dessiner(d);
 	}
 }
