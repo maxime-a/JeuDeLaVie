@@ -8,7 +8,8 @@
 
 #include<stdlib.h>
 #include<string.h>
-#include"libsx.h"
+#include<libsx.h>
+
 #include"modele.h"
 
 /*			initialiserAffichage

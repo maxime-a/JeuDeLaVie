@@ -6,7 +6,8 @@
 
 #include<stdlib.h>
 #include<stdio.h>
-#include"libsx.h"
+#include<libsx.h>
+
 #include"donnees.h"
 #include"vue.h"
 
@@ -245,7 +246,7 @@ void modeb(Widget w, void *data)
  */
 void aideb(Widget w, void *data)
 {
-	GetOkay("-Entrez un nom de fichier et appuyez sur les boutons correspondants pour charger ou sauvegarder un etat\n-Appuyez sur le bouton RaZ pour réinitiliser l'automate\n-Utilisez la barre horizontale pour changer la periode d'animation\n-Clic gauche dans la zone d'affichage pour faire naitre une cellule a cet endroit\n-Clic droit dans la zone d'affichage pour faire mourir une cellule a cet endroit");
+	GetOkay("-Entrez un nom de fichier et appuyez sur les boutons correspondants pour charger ou sauvegarder un etat\n-Appuyez sur le bouton RaZ pour reinitiliser l'automate\n-Utilisez la barre horizontale pour changer la periode d'animation\n-Clic gauche dans la zone d'affichage pour faire naitre une cellule a cet endroit\n-Clic droit dans la zone d'affichage pour faire mourir une cellule a cet endroit");
 }
 
 /*			Quadrillageb

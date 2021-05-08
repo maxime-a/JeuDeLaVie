@@ -6,9 +6,11 @@
 
 #include<stdlib.h>
 #include<string.h>
-#include"libsx.h"
+#include<libsx.h>
+
 #include"donnees.h"
 #include"rappels.h"
+
 #include"vue.h"
 
 /*			initialiserAffichage
@@ -23,6 +25,7 @@ int initialiserAffichage(int argc, char *argv[],donnees *d)
   	if (argc == FALSE)
     		return EXIT_FAILURE;
 	
+	/*Déclaration des widgets*/
 	Widget fichier=MakeStringEntry("./nomDossier/nomFichier.jdlv", 300, chargerOuSauvegarder, NULL); 	//Zone d'entrée texte pour le nom des fichiers
 	d->widgetFichier=fichier;
 	Widget bQuitter=MakeButton("Quitter", quitterb, d);
@@ -46,8 +49,7 @@ int initialiserAffichage(int argc, char *argv[],donnees *d)
 	
 	SetScrollbar(slider, 50.0, MAXPERIOD, MINPERIOD);				//Initalisation position à 0.5s par défaut
 	
-	//En tête
-	
+	/*Assemblage des widgets*/
 	//Première ligne
 	SetWidgetPos(bChoixFichiers,PLACE_UNDER,fichier,NO_CARE,NULL);
 	SetWidgetPos(bCharger,PLACE_RIGHT,bChoixFichiers,PLACE_UNDER,fichier);
@@ -71,7 +73,7 @@ int initialiserAffichage(int argc, char *argv[],donnees *d)
 	//Sixième ligne
 	SetWidgetPos(lGeneration,PLACE_UNDER,lPeriode,NO_CARE,NULL);
 	
-	//septième ligne
+	//Septième ligne
 	SetWidgetPos(bRaZ,PLACE_UNDER,lGeneration,NO_CARE,NULL);
 	
 	//Bas

@@ -7,10 +7,7 @@
 
 #include<stdlib.h>
 #include<assert.h>
-#include"libsx.h"
-#include"grille.h"
-#include"donnees.h"
-#include"vue.h"
+#include<libsx.h>
 
 #include"modele.h"
 
@@ -40,13 +37,13 @@ char appliquerConway(char val,int nbVoisins)
 {
 	if(val==vivant)
 		if(nbVoisins==2||nbVoisins==3)
-			return vivant;
+			return vivant;	//survie
 		else if(nbVoisins>3)
-			return mort;
+			return mort;	//mort par surpopulation
 		else
-			return mort;
+			return mort;	//mort par isolement
 	else if(val==mort && nbVoisins==3)
-		return vivant;
+		return vivant;		//naissance
 	else
 		return mort;
 }

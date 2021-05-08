@@ -6,6 +6,9 @@
  
 #pragma once
 
+#include"grille.h"
+#include"donnees.h"
+
 /*			calculerVoisins
  *
  * Rôle: calcul le nombre de voisins d'une cellule
