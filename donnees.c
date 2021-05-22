@@ -57,9 +57,10 @@ donnees *initialiserDonnees(int argc, char *argv[])
 	d->desactiverDelai=TRUE;
 	d->delai=500;				//0.5s par défaut
 	d->activerQuadrillage=TRUE;
+	d->couleur=FALSE;
 	d->nombreGeneration=0;
 	
-	creerGrille(&(d->cellules),0);
+	creerGrille(&(d->cellules),mort);
 	
 	return d;
 }
@@ -83,7 +84,7 @@ int getHauteur(donnees *d)
  */
 int getLargeur(donnees *d)
 {
-	return d->cellules.hauteur;
+	return d->cellules.largeur;
 }
 
 /*			getQuadrillage
@@ -105,6 +106,7 @@ char getQuadrillage(donnees *d)
  */
 char getValeur(donnees *d,int x,int y)
 {
+	assert(x>=0 && x<d->cellules.largeur && y>=0 && y<d->cellules.hauteur); 
 	return d->cellules.valeurs[x][y];
 }
 
@@ -150,6 +152,17 @@ char getDesactiverDelai(donnees *d)
 char getVariante(donnees *d)
 {
 	return d->variante;
+}
+
+/*			getCouleur
+ *
+ * Rôle: permet de récuperer le mode d'affichage voulu
+ * Antécédents: un pointeur sur donnees
+ *
+ */
+char getCouleur(donnees *d)
+{
+	return d->couleur;
 }
 
 /*			getLabelGeneration
@@ -254,6 +267,17 @@ void setActiverQuadrillage(donnees *d,char val)
 	d->activerQuadrillage=val;
 }
 
+/*			setCouleur
+ *
+ * Rôle: permet de modifier la volonté ou non d'activer l'affichage des couleurs
+ * Antécédents: un pointeur sur donnees et la valeur de type char (attendue comme FALSE ou TRUE)
+ *
+ */
+void setCouleur(donnees *d,char val)
+{
+	d->couleur=val;
+}
+
 /*			setVariante
  *
  * Rôle: permet de modifier la variante de calcul
@@ -308,7 +332,7 @@ void chargerFichier(const char *filename, donnees *d)
 	{
 		int x1,y1,x2,y2; //x1,y1 coordonnées du fichier , x2,y2 coordonées du jeu
 
-		initialiserGrille(getCellules(d),0);
+		initialiserGrille(getCellules(d),mort);
 
 		//lire et décentrer les coordonées du fichier avant de modifier l'état de la cellule correspondante.
 		while((fscanf(fichier,"%d,%d",&x1,&y1)!=EOF))
@@ -317,7 +341,7 @@ void chargerFichier(const char *filename, donnees *d)
 			y2=y1+getHauteur(d)/2;
 			
 			if(x2>=0 && x2<getLargeur(d) && y2>=0 && y2<getHauteur(d)) //coordonnées valide dans la zone de jeu 
-				setValeur(d,x2,y2,vivant); 
+				setValeur(d,x2,y2,survie); 
 			else
 			{
 				Beep();
@@ -350,7 +374,7 @@ void sauvegarderFichier(const char *filename, donnees *d)
 	{
 		for(int x=0;x<getLargeur(d);x++)
 			for(int y=0;y<getHauteur(d);y++)
-				if(getValeur(d,x,y))
+				if(getValeur(d,x,y)==survie||getValeur(d,x,y)==naissance)
 					fprintf(fichier,"%d,%d\n",x-getLargeur(d)/2,y-getHauteur(d)/2); //écrire avec les coordonnées centrées(milieu de grille = 0,0 selon l'écriture fichier)
 		fclose(fichier);
 	}

@@ -6,7 +6,6 @@
  */
 
 #include<stdlib.h>
-#include<assert.h>
 #include<libsx.h>
 
 #include"modele.h"
@@ -19,11 +18,11 @@
 int calculerVoisins(grille g,int x,int y)
 {
 	int nbVoisins=0;
-	for(int b=0;b<3;b++)   
-		for(int n=0;n<3;n++)
-			if(x-1+b>=0 && y-1+n>0 && x-1+b<g.largeur &&y-1+n<g.hauteur) //Vérifie si le voisin a un indice valide dans la grille
-				if(b!=1 || n!=1)				    //Ne pas compter la cellule elle même dans ses voisins 
-					if(g.valeurs[x-1+b][y-1+n]==vivant)
+	for(int b=-1;b<2;b++)   
+		for(int n=-1;n<2;n++)
+			if(x+b>=0 && y+n>0 && x+b<g.largeur &&y+n<g.hauteur)  //Vérifie si le voisin a un indice valide dans la grille
+				if(b!=0 || n!=0)				//Ne pas compter la cellule elle même dans ses voisins 
+					if(g.valeurs[x+b][y+n]==survie||g.valeurs[x+b][y+n]==naissance)
 						nbVoisins++;
 	return nbVoisins;
 }
@@ -35,16 +34,18 @@ int calculerVoisins(grille g,int x,int y)
  */
 char appliquerConway(char val,int nbVoisins)
 {
-	if(val==vivant)
+	if(val==survie||val==naissance)
+	{
 		if(nbVoisins==2||nbVoisins==3)
-			return vivant;	//survie
+			return survie;		//survie
 		else if(nbVoisins>3)
-			return mort;	//mort par surpopulation
+			return surpopulation;	//mort par surpopulation
 		else
-			return mort;	//mort par isolement
-	else if(val==mort && nbVoisins==3)
-		return vivant;		//naissance
-	else
+			return isolement;	//mort par isolement
+	}
+	if((val==isolement || val==surpopulation || val==mort) && nbVoisins==3)
+		return naissance;		//naissance
+	else 
 		return mort;
 }
 
@@ -55,14 +56,14 @@ char appliquerConway(char val,int nbVoisins)
  */
 char appliquerThompson(char val,int nbVoisins)
 {
-	if(val==vivant)
+	if(val==survie||val==naissance)
 		if(nbVoisins==3||nbVoisins==4||nbVoisins==6||nbVoisins==7||nbVoisins==8)
-			return vivant;
+			return survie;
 		else
 			return mort;
 	else
 		if(nbVoisins==3||nbVoisins==6||nbVoisins==7||nbVoisins==8)
-			return vivant;
+			return survie;
 		else
 			return mort;
 }
@@ -76,18 +77,18 @@ char appliquerThompson(char val,int nbVoisins)
 void calculerProchaineGeneration(donnees *d)
 {
 	char nbVoisins;
-	grille futureCellules={getLargeur(d),getHauteur(d)};		//grille tampon pour la nouvelle genration
+	grille futureCellules={getLargeur(d),getHauteur(d)};			//grille tampon pour la nouvelle genration
 	creerGrille(&futureCellules,0);
 	
-	for(int x=0;x<getLargeur(d);x++)
-		for(int y=0;y<getHauteur(d);y++)
+	for(int x=0;x<getLargeur(d);x++)					//parcours de toutes les cellules en largeur
+		for(int y=0;y<getHauteur(d);y++)				//et en hauteur
 		{
-			nbVoisins=calculerVoisins(*getCellules(d),x,y);
+			nbVoisins=calculerVoisins(*getCellules(d),x,y);	//calcul des voisins pour la cellule de coordonnées x,y
 			if(getVariante(d)==conway)
 				futureCellules.valeurs[x][y]=appliquerConway(getValeur(d,x,y),nbVoisins);
 			else
 				futureCellules.valeurs[x][y]=appliquerThompson(getValeur(d,x,y),nbVoisins);
 		}
 	copierGrille(getCellules(d),&futureCellules);					
-	setNombreGeneration(d,getNombreGeneration(d)+1);
+	setNombreGeneration(d,getNombreGeneration(d)+1);			//incrémentation du numéro de génération
 }

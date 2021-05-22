@@ -116,9 +116,18 @@ extern void aideb(Widget w, void *data);
 
 /*			Quadrillageb
  *
- * Rôle: procédure de rappel du bouton grille, permute l'affichage de la grille 
+ * Rôle: procédure de rappel du bouton quadrillage, permute l'affichage de la grille 
  * Antécédents: w le widget du bouton, data (inutile mais nécessaire)
  *
  */
 extern void Quadrillageb(Widget w, void *data);
+
+/*			Couleurb
+ *
+ * Rôle: procédure de rappel du bouton grille, permute l'affichage des couleurs pour
+ * des détails sur l'état des cellules 
+ * Antécédents: w le widget du bouton, data une structure donnees 
+ *
+ */
+extern void Couleurb(Widget w, void *data);
 

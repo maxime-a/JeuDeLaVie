@@ -44,6 +44,7 @@ int initialiserAffichage(int argc, char *argv[],donnees *d)
 	Widget bMode=MakeToggle("Conway  ", FALSE, NULL, modeb, d); 
 	Widget bAide=MakeButton("Aide",aideb,NULL);
 	Widget bQuadrillage=MakeToggle("Afficher quadrillage",TRUE,NULL,Quadrillageb,d);
+	Widget bCouleur=MakeToggle("Afficher couleurs",FALSE,NULL,Couleurb,d);
 		
 	SetButtonUpCB(jeu, button_up); 						//Rappel lors d'un clic dans la zone
 	
@@ -62,6 +63,7 @@ int initialiserAffichage(int argc, char *argv[],donnees *d)
 	
 	//Troisième ligne
 	SetWidgetPos(bQuadrillage,PLACE_UNDER,lMode,NO_CARE,NULL);
+	SetWidgetPos(bCouleur,PLACE_UNDER,lMode,PLACE_RIGHT,bQuadrillage);
 	
 	//Quatrième ligne 
 	SetWidgetPos(bAnimer,PLACE_UNDER,bQuadrillage,NO_CARE,NULL);
@@ -91,6 +93,7 @@ int initialiserAffichage(int argc, char *argv[],donnees *d)
  */
 void dessinerQuadrillage(donnees *d)
 {
+	SetColor(GetNamedColor("black"));
 	for(int x=1;x<=getLargeur(d);x++)
 	{
 		DrawLine(x*10,0,x*10,getHauteur(d)*10); 	 //Dessin des barres verticales
@@ -108,6 +111,8 @@ void dessinerQuadrillage(donnees *d)
  */
 void dessiner(donnees *d)
 {
+	char val;
+	
 	ClearDrawArea(); 
 	if(getQuadrillage(d))
 		dessinerQuadrillage(d);
@@ -116,8 +121,25 @@ void dessiner(donnees *d)
 	{
 		for(int y=0;y<getHauteur(d);y++)
 		{
-			if(getValeur(d,x,y))
+			val=getValeur(d,x,y);
+			if(getCouleur(d))
+			{
+				if(val==survie)
+					SetColor(GetNamedColor("black")); 
+				else if(val==naissance)
+					SetColor(GetNamedColor("green"));	//en vert
+				else if(val==isolement)
+					SetColor(GetNamedColor("orange"));	//en orange
+				else if(val==surpopulation)
+					SetColor(GetNamedColor("red"));	//en rouge
+				if(val!=mort)
+					DrawFilledBox(x*10, y*10, 10, 10); 
+			}
+			else if(val==survie||val==naissance)
+			{
+				SetColor(GetNamedColor("black"));
 				DrawFilledBox(x*10, y*10, 10, 10); 
+			}
 		}
 	}
 }

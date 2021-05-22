@@ -10,10 +10,10 @@
 #include"grille.h"
 
 #define TAILLEDEFAUT 50
-#define HAUTEURMIN 15
+#define HAUTEURMIN 20
 #define LARGEURMIN 1
 
-enum etat {mort,vivant};
+enum etat {naissance,survie,isolement,surpopulation,mort,vivant};
 
 enum mode {conway,thompson};
 
@@ -26,6 +26,7 @@ typedef struct {
 	char variante;
 	char activerQuadrillage;
 	char desactiverDelai;
+	char couleur;
 	int delai;
 	int nombreGeneration;
 	
@@ -104,6 +105,14 @@ extern char getDesactiverDelai(donnees *d);
  */
 extern char getVariante(donnees *d);
 
+/*			getCouleur
+ *
+ * Rôle: permet de récuperer le mode d'affichage voulu
+ * Antécédents: un pointeur sur donnees
+ *
+ */
+char getCouleur(donnees *d);
+
 /*			getLabelGeneration
  *
  * Rôle: permet de récuperer le label affichant le nombre de génération
@@ -175,6 +184,15 @@ extern void setDesactiverDelai(donnees *d,char val);
  *
  */
 extern void setActiverQuadrillage(donnees *d,char val);
+
+/*			setCouleur
+ *
+ * Rôle: permet de modifier la volonté ou non d'activer l'affichage des couleurs
+ * Antécédents: un pointeur sur donnees et la valeur de type char (attendue comme FALSE ou TRUE)
+ *
+ */
+ 
+extern void setCouleur(donnees *d,char val);
 
 /*			setVariante
  *

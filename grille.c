@@ -45,10 +45,20 @@ void initialiserGrille(grille *g,char val)
  */
 void creerGrille(grille *g,char val)
 {
-        g->valeurs = malloc(g->largeur * sizeof(char *));	
-	//invariant : pour tout i sur la largeur de la grille, valeur[i] pointe vers un tableau de taille hauteur
-    	for (int i=0; i<g->largeur; i++)
-        	g->valeurs[i] = malloc(g->hauteur * sizeof(char));
+	if(g->hauteur>=g->largeur)
+	{
+		g->valeurs = malloc(g->hauteur * sizeof(char *));
+		//invariant : pour tout i sur la hauteur de la grille, valeur[i] pointe vers un tableau de char de taille largeur
+	    	for (int i=0; i<g->hauteur; i++)
+			g->valeurs[i] = malloc(g->largeur * sizeof(char));
+	}
+	else
+	{
+		g->valeurs = malloc(g->largeur * sizeof(char *));
+		//invariant : pour tout i sur la largeur de la grille, valeur[i] pointe vers un tableau de char de taille hauteur
+	    	for (int i=0; i<g->largeur; i++)
+			g->valeurs[i] = malloc(g->hauteur * sizeof(char));
+	}
         
 	initialiserGrille(g,val);
 }
@@ -60,8 +70,5 @@ void creerGrille(grille *g,char val)
  */
 void libererGrille(grille *g)
 {	
-	//invariant : pour tout i sur la largeur de la grille, la mémoire en valeur[i] est désallouée 
-    	for (int i=0; i<g->largeur; i++)
-        	free(g->valeurs[i]);
-        free(g->valeurs);
+		free(g->valeurs);
 }

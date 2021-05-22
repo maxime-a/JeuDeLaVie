@@ -62,7 +62,7 @@ void button_up(Widget w, int which_button, int x, int y, void *data)
 		if(x/10<getLargeur(d) && y/10<getHauteur(d))	//eviter de dessiner sur des indices interdits hors de la grille lors de l'agrandissement de la fenêtre
 		{
 			DrawFilledBox(x/10*10, y/10*10, 10, 10); 		//dessiner un carré aux coordonnées arrondies à la dizaine pour respecter le pas (10pixel) d'une cellule sur la grille  
-			setValeur(d,x/10,y/10,vivant);			//mettre à jour la cellule correspondante
+			setValeur(d,x/10,y/10,survie);			//mettre à jour la cellule correspondante
 		}
 	}  
 	else
@@ -251,7 +251,7 @@ void aideb(Widget w, void *data)
 
 /*			Quadrillageb
  *
- * Rôle: procédure de rappel du bouton grille, permute l'affichage de la grille 
+ * Rôle: procédure de rappel du bouton quadrillage, permute l'affichage de la grille 
  * Antécédents: w le widget du bouton, data une structure donnees 
  *
  */
@@ -267,6 +267,29 @@ void Quadrillageb(Widget w, void *data)
 	else
 	{	
 		setActiverQuadrillage(d,FALSE);
+		dessiner(d);
+	}
+}
+
+/*			Couleurb
+ *
+ * Rôle: procédure de rappel du bouton grille, permute l'affichage des couleurs pour
+ * des détails sur l'état des cellules 
+ * Antécédents: w le widget du bouton, data une structure donnees 
+ *
+ */
+void Couleurb(Widget w, void *data)
+{
+	donnees *d = (donnees *)data;                           //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
+	
+	if(GetToggleState(w))
+	{
+		setCouleur(d,TRUE);
+		dessiner(d);
+	}
+	else
+	{	
+		setCouleur(d,FALSE);
 		dessiner(d);
 	}
 }
