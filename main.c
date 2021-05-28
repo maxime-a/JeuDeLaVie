@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;	
 	
 	ShowDisplay();
+	
+	initialiserCouleurs(d);
+	
 	MainLoop();
 	
 	return EXIT_SUCCESS;

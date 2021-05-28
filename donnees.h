@@ -17,6 +17,8 @@ enum etat {naissance,survie,isolement,surpopulation,mort,vivant};
 
 enum mode {conway,thompson};
 
+enum couleur {noir,gris,vert,orange,rouge};
+
 typedef struct {
 
 	Widget widgetFichier;
@@ -30,6 +32,8 @@ typedef struct {
 	int delai;
 	int nombreGeneration;
 	
+	int noir,gris,vert,orange,rouge;
+	
 	grille cellules;
 }donnees;
 
@@ -40,6 +44,14 @@ typedef struct {
  *
  */
 extern donnees *initialiserDonnees(int argc, char *argv[]);
+
+/*			initialiserCouleurs
+ *
+ * Rôle: récupère le code des couleurs utilisées
+ * Antécédents: un pointeur sur donnees
+ *
+ */
+extern void initialiserCouleurs(donnees *d);
 
 /*			getHauteur
  *
@@ -112,6 +124,14 @@ extern char getVariante(donnees *d);
  *
  */
 char getCouleur(donnees *d);
+
+/*			getValCouleur
+ *
+ * Rôle: permet de récuperer les valeurs dans lesquelles sont codées les couleurs
+ * Antécédents: un pointeur sur donnees, la couleur voulue
+ *
+ */
+int getValCouleur(donnees *d,int couleur);
 
 /*			getLabelGeneration
  *

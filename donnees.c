@@ -37,9 +37,13 @@ donnees *initialiserDonnees(int argc, char *argv[])
     			l=atoi(argv[1]);
     			if(l>=LARGEURMIN)    	//paramètre valide
     				d->cellules.largeur=l;
+    			else
+    				printf("Largeur indiquee trop faible. Min=%d\nLargeur par defaut appliquee : %d\n",LARGEURMIN,TAILLEDEFAUT);
     			h=atoi(argv[2]);
     			if(h>=HAUTEURMIN)	//paramètre valide
     				d->cellules.hauteur=h;
+    			else
+    				printf("Hauteur indiquee trop faible. Min=%d\nHauteur par defaut appliquee : %d\n",HAUTEURMIN,TAILLEDEFAUT);
     	}
     	else if(argc==2)			//Si un seul paramètre, largeur et hauteur seront identique au paramètre
  	{
@@ -51,6 +55,8 @@ donnees *initialiserDonnees(int argc, char *argv[])
     			d->cellules.largeur=taille;
     			d->cellules.hauteur=taille;
 		}
+		else
+			printf("Taille indiquee trop faible. Min=%d\nTaille par defaut appliquee : %d\n",HAUTEURMIN,TAILLEDEFAUT);
     	}
 	
 	d->variante=conway;
@@ -63,6 +69,21 @@ donnees *initialiserDonnees(int argc, char *argv[])
 	creerGrille(&(d->cellules),mort);
 	
 	return d;
+}
+
+/*			initialiserCouleurs
+ *
+ * Rôle: récupère le code des couleurs utilisées
+ * Antécédents: un pointeur sur donnees
+ *
+ */
+extern void initialiserCouleurs(donnees *d)
+{
+	d->noir=GetNamedColor("black");
+	d->gris=GetNamedColor("grey");
+	d->vert=GetNamedColor("green");
+	d->orange=GetNamedColor("orange");
+	d->rouge=GetNamedColor("red");
 }
 
 /*			getHauteur
@@ -165,6 +186,23 @@ char getCouleur(donnees *d)
 	return d->couleur;
 }
 
+/*			getValCouleur
+ *
+ * Rôle: permet de récuperer les valeurs dans lesquelles sont codées les couleurs
+ * Antécédents: un pointeur sur donnees, la couleur voulue
+ *
+ */
+int getValCouleur(donnees *d,int couleur)
+{
+	switch(couleur)
+	{
+		case gris: return d->gris;
+		case vert: return d->vert;
+		case orange: return d->orange;
+		case rouge: return d->rouge;
+		default: return d->noir;
+	}
+}
 /*			getLabelGeneration
  *
  * Rôle: permet de récuperer le label affichant le nombre de génération

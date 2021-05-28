@@ -57,10 +57,11 @@ void RaZb(Widget w, void *data)
 void button_up(Widget w, int which_button, int x, int y, void *data)
 {
 	donnees *d = (donnees *)data;                         //cast pour bien spécifier que c'est un pointeur sur donnees et pas void.
-	if(which_button==1)
+	if(which_button==1)					//clic gauche
 	{
 		if(x/10<getLargeur(d) && y/10<getHauteur(d))	//eviter de dessiner sur des indices interdits hors de la grille lors de l'agrandissement de la fenêtre
 		{
+			SetColor(getValCouleur(d,noir)); 
 			DrawFilledBox(x/10*10, y/10*10, 10, 10); 		//dessiner un carré aux coordonnées arrondies à la dizaine pour respecter le pas (10pixel) d'une cellule sur la grille  
 			setValeur(d,x/10,y/10,survie);			//mettre à jour la cellule correspondante
 		}

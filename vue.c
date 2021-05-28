@@ -93,7 +93,7 @@ int initialiserAffichage(int argc, char *argv[],donnees *d)
  */
 void dessinerQuadrillage(donnees *d)
 {
-	SetColor(GetNamedColor("black"));
+	SetColor(getValCouleur(d,gris));
 	for(int x=1;x<=getLargeur(d);x++)
 	{
 		DrawLine(x*10,0,x*10,getHauteur(d)*10); 	 //Dessin des barres verticales
@@ -125,19 +125,19 @@ void dessiner(donnees *d)
 			if(getCouleur(d))
 			{
 				if(val==survie)
-					SetColor(GetNamedColor("black")); 
+					SetColor(getValCouleur(d,noir)); 
 				else if(val==naissance)
-					SetColor(GetNamedColor("green"));	//en vert
+					SetColor(getValCouleur(d,vert));	//en vert
 				else if(val==isolement)
-					SetColor(GetNamedColor("orange"));	//en orange
+					SetColor(getValCouleur(d,orange));	//en orange
 				else if(val==surpopulation)
-					SetColor(GetNamedColor("red"));	//en rouge
+					SetColor(getValCouleur(d,rouge));	//en rouge
 				if(val!=mort)
 					DrawFilledBox(x*10, y*10, 10, 10); 
 			}
 			else if(val==survie||val==naissance)
 			{
-				SetColor(GetNamedColor("black"));
+				SetColor(getValCouleur(d,noir));
 				DrawFilledBox(x*10, y*10, 10, 10); 
 			}
 		}
